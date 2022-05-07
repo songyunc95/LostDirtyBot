@@ -32,4 +32,5 @@ def load_webpage():
 
     return marchent_info[1:]
 
-print(load_webpage())
+if __name__ == '__main__':
+    print(load_webpage())

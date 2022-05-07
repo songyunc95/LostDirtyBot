@@ -9,8 +9,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = os.getenv('CHANNEL_TOKEN')
 
-BOT = commands.bot(command_prefix='$')
-CHANNEL = BOT.get_channel(CHANNEL_ID) 
+BOT = commands.Bot(command_prefix='$')
 
 MERCHANTS = {} 
 
@@ -20,20 +19,22 @@ async def on_ready():
 
 @BOT.command(name='ListMerchants')
 async def list_merchants(ctx):
-    merchants = '\n'.join(map(str, MERCHANTS.items()))
-    await CHANNEL.send(f'List Found Merchants: \n{merchants}')
+    channel = BOT.get_channel(int(CHANNEL_ID))
+    merchants = '\n'.join(map(str, MERCHANTS.items())) if MERCHANTS else "None"
+    await channel.send(f'List Found Merchants: \n{merchants}')
 
 @tasks.loop(minutes=1.0, count=None)
 async def my_background_task():
     if datetime.datetime.now().minute not in range(30,40):
         MERCHANTS = {}
         return
-    
+
+    channel = BOT.get_channel(int(CHANNEL_ID))
     for merchant in load_webpage():
         if len(merchant) > 3:
             if (merchant_name := merchant[0]) not in MERCHANTS:
                 MERCHANTS[merchant_name] = merchant
-                await CHANNEL.send(f'New Merchant Found: {merchant}')
+                await channel.send(f'New Merchant Found: {merchant}')
 
 my_background_task.start()
 
